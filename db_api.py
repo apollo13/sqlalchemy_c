@@ -1,7 +1,7 @@
 import cffi
 from sqlalchemy import create_engine
 
-ffi = cffi.FFI()
+from _db_api import ffi
 
 engine = create_engine('sqlite:///:memory:', echo=False)
 
@@ -40,6 +40,7 @@ class Cursor(object):
         print "DESTROYING CURSOR!"
 
 
+@ffi.def_extern()
 def db_get_cursor():
     cursor = Cursor()
     handle = ffi.new_handle(cursor)
@@ -47,6 +48,7 @@ def db_get_cursor():
     return handle
 
 
+@ffi.def_extern()
 def db_close_cursor(cursor_handle):
     cursor = ffi.from_handle(cursor_handle)
     if cursor.result:
@@ -54,6 +56,7 @@ def db_close_cursor(cursor_handle):
     handles.remove(cursor_handle)
 
 
+@ffi.def_extern()
 def db_prepare(cursor_handle, statement):
     cursor = ffi.from_handle(cursor_handle)
     if cursor.result:
@@ -62,16 +65,19 @@ def db_prepare(cursor_handle, statement):
     cursor.statement = ffi.string(statement)
 
 
+@ffi.def_extern()
 def db_execute(cursor_handle):
     cursor = ffi.from_handle(cursor_handle)
     cursor.result = engine.execute(cursor.statement, cursor.args)
 
 
+@ffi.def_extern()
 def db_fetchone(cursor_handle):
     cursor = ffi.from_handle(cursor_handle)
     return cursor.fetchone()
 
 
+@ffi.def_extern()
 def db_get_string(row_handle, index, error):
     row = ffi.from_handle(row_handle)
     error[0] = 0
@@ -84,6 +90,7 @@ def db_get_string(row_handle, index, error):
     return ffi.NULL
 
 
+@ffi.def_extern()
 def db_get_int(row_handle, index, error):
     row = ffi.from_handle(row_handle)
     error[0] = 0
@@ -94,6 +101,7 @@ def db_get_int(row_handle, index, error):
     return 0
 
 
+@ffi.def_extern()
 def db_get_float(row_handle, index, error):
     row = ffi.from_handle(row_handle)
     error[0] = 0
